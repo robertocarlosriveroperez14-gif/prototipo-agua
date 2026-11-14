@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plataforma de gestión predictiva del agua – Aguachica</title>
+<style>
+:root{--bg:#f2f7f8;--card:#ffffff;--ink:#12303b;--mut:#4b6670;--line:#cddce1;--water:#0e7490;--water2:#bfe3ec;
+--ok:#2f7d4f;--okbg:#e2f2e8;--warn:#9a5f00;--warnbg:#fbefd5;--bad:#b42318;--badbg:#fbe3e0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1b20;--card:#15272e;--ink:#e3eef1;--mut:#9db6be;--line:#2b434c;--water:#4cc3de;--water2:#1d4a58;
+--ok:#6fd195;--okbg:#173524;--warn:#f0b64e;--warnbg:#3a2d12;--bad:#ff8a7d;--badbg:#401c18}}
+:root[data-theme="dark"]{--bg:#0e1b20;--card:#15272e;--ink:#e3eef1;--mut:#9db6be;--line:#2b434c;--water:#4cc3de;--water2:#1d4a58;
+--ok:#6fd195;--okbg:#173524;--warn:#f0b64e;--warnbg:#3a2d12;--bad:#ff8a7d;--badbg:#401c18}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+header{padding:28px 20px 8px;max-width:1040px;margin:0 auto}
+h1{font:700 clamp(1.5rem,3.4vw,2.2rem)/1.15 Georgia,"Times New Roman",serif;margin:0 0 6px}
+header p{margin:0;color:var(--mut);max-width:62ch}
+main{max-width:1040px;margin:0 auto;padding:12px 20px 40px;display:grid;gap:18px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px}
+h2{font-size:1.05rem;margin:0 0 12px}
+.aviso{font-size:.88rem;color:var(--mut);margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:block;font-size:.9rem;font-weight:600}
+input{width:100%;margin-top:4px;padding:9px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+.acciones{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+button{font:inherit;font-weight:600;padding:9px 16px;border-radius:6px;border:1px solid var(--water);background:var(--water);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.pri{color:#04222b}}
+button.sec{background:transparent;color:var(--water)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chips button{padding:5px 10px;font-size:.82rem;font-weight:500}
+.chips span{font-size:.85rem;color:var(--mut);align-self:center;margin-right:4px}
+#error{margin-top:12px;padding:10px 12px;border-radius:6px;background:var(--badbg);color:var(--bad);font-weight:600;display:none}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.res div{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
+.res small{display:block;color:var(--mut);font-size:.8rem}
+.res b{font-size:1.35rem}
+#estado{padding:10px 12px;border-radius:6px;font-weight:700;background:var(--bg)}
+#estado.ok{background:var(--okbg);color:var(--ok)}#estado.warn{background:var(--warnbg);color:var(--warn)}#estado.bad{background:var(--badbg);color:var(--bad)}
+.tanque-wrap{display:flex;gap:14px;align-items:flex-end;justify-content:center}
+.tanque{position:relative;width:110px;height:240px;border:3px solid var(--ink);border-top-width:0;border-radius:0 0 14px 14px;background:var(--bg);overflow:visible}
+.nivel{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--water);border-radius:0 0 10px 10px;transition:height .5s}
+.nivel.warn{background:var(--warn)}.nivel.bad{background:var(--bad)}
+.marca{position:absolute;left:-10px;right:-62px;border-top:2px dashed var(--ink);font-size:.78rem;padding-left:122px;line-height:1}
+.marca span{position:relative;top:-14px;background:var(--card);padding:0 3px}
+.tabla-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.9rem}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th{border-bottom:2px solid var(--ink);font-weight:700}
+th:first-child,td:first-child,th:last-child,td:last-child{text-align:left}
+td.e-ok{color:var(--ok);font-weight:600}td.e-warn{color:var(--warn);font-weight:600}td.e-bad{color:var(--bad);font-weight:600}
+.vacio{color:var(--mut);padding:10px 0}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--mut);font:12px "Segoe UI",system-ui,sans-serif}
+.ejes{stroke:var(--ink);stroke-width:1.5}.rejilla{stroke:var(--line);stroke-width:1}
+.pd{fill:var(--water)}.pc{fill:none;stroke:var(--ink);stroke-width:2}
+</style>
+</head>
+<body>
+<header>
+<h1>Plataforma de gestión predictiva del agua potable</h1>
+<p>Demanda y capacidad de almacenamiento en Aguachica, Cesar. Prototipo de baja fidelidad para la Etapa 4.</p>
+</header>
+<main>
+<section aria-labelledby="t1">
+<h2 id="t1">Datos de entrada</h2>
+<p class="aviso">Los datos son simulados con fines académicos y no representan mediciones oficiales del acueducto.</p>
+<div class="campos">
+<label>Consumo de referencia, C (m³)<input id="C" type="number" step="any" inputmode="decimal" value="500"></label>
+<label>Tasa de crecimiento, r (%)<input id="r" type="number" step="any" inputmode="decimal" value="3"></label>
+<label>Capacidad de almacenamiento, V (m³)<input id="V" type="number" step="any" inputmode="decimal" value="1000"></label>
+</div>
+<div class="acciones">
+<button class="pri" id="calcular">Calcular</button>
+<button class="sec" id="limpiar">Borrar historial</button>
+</div>
+<div class="chips" id="chips" role="group" aria-label="Cargar una prueba"><span>Cargar prueba:</span></div>
+<div id="error" role="alert"></div>
+</section>
+
+<div class="grid2">
+<section aria-labelledby="t2">
+<h2 id="t2">Resultados</h2>
+<div class="res">
+<div><small>Demanda proyectada</small><b id="oDp">—</b><small>m³</small></div>
+<div><small>Balance</small><b id="oB">—</b><small>m³</small></div>
+<div><small>Utilización</small><b id="oU">—</b><small>%</small></div>
+</div>
+<div id="estado">Ingresa los datos y presiona Calcular.</div>
+<p class="aviso" style="margin-top:12px">Dp = C × (1 + r) · B = V − Dp · U = (Dp / V) × 100<br>Normal hasta 85 %, alerta preventiva hasta 100 %, crítico por encima de 100 %.</p>
+</section>
+<section aria-labelledby="t3">
+<h2 id="t3">Nivel del tanque</h2>
+<div class="tanque-wrap">
+<div class="tanque" role="img" aria-label="Utilización del tanque" id="tanque">
+<div class="nivel" id="nivel"></div>
+<div class="marca" style="bottom:calc(100% * 85 / 120)"><span>85 %</span></div>
+<div class="marca" style="bottom:calc(100% * 100 / 120)"><span>100 %</span></div>
+</div>
+</div>
+<p class="aviso" style="text-align:center;margin-top:30px">Escala de 0 % a 120 % de la capacidad.</p>
+</section>
+</div>
+
+<section aria-labelledby="t4">
+<h2 id="t4">Historial de pruebas</h2>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Prueba</th><th>C (m³)</th><th>r (%)</th><th>V (m³)</th><th>Dp (m³)</th><th>B (m³)</th><th>U (%)</th><th>Estado</th><th>Desvío en Dp (m³)</th></tr></thead>
+<tbody id="hist"></tbody>
+</table>
+</div>
+<p class="vacio" id="vacio">Aún no hay pruebas registradas.</p>
+</section>
+
+<section aria-labelledby="t5">
+<h2 id="t5">Demanda proyectada frente a la capacidad</h2>
+<svg id="grafico" viewBox="0 0 600 280" role="img" aria-label="Gráfico de dispersión de demanda proyectada y capacidad por prueba"></svg>
+</section>
+</main>
+
+<script>
+(function(){
+var PRUEBAS=[
+ {n:"Normal",C:500,r:3,V:1000,Dp:515},
+ {n:"Límite de normal",C:850,r:0,V:1000,Dp:850},
+ {n:"Alerta preventiva",C:800,r:10,V:1000,Dp:880},
+ {n:"Límite de capacidad",C:1000,r:0,V:1000,Dp:1000},
+ {n:"Crítico",C:1100,r:15,V:1200,Dp:1265},
+ {n:"Entrada inválida",C:800,r:5,V:0,Dp:null}
+];
+var hist=[];
+var $=function(i){return document.getElementById(i)};
+function fmt(n){return n.toFixed(2).replace(".",",")}
+function clasificar(U){
+ if(U<=85)return{k:"ok",t:"Normal",m:"capacidad suficiente"};
+ if(U<=100)return{k:"warn",t:"Alerta preventiva",m:"alta utilización"};
+ return{k:"bad",t:"Alerta crítica",m:"demanda superior a la capacidad"};
+}
+function validar(C,r,V){
+ if(!isFinite(C)||!isFinite(r)||!isFinite(V))return"Ingresa un valor numérico en los tres campos.";
+ if(C<0||r<0)return"El consumo y la tasa de crecimiento no pueden ser negativos.";
+ if(V<=0)return"La capacidad de almacenamiento debe ser mayor que cero.";
+ return"";
+}
+function leer(id){var v=$(id).value;return v.trim()===""?NaN:Number(v)}
+function calcular(){
+ var C=leer("C"),r=leer("r"),V=leer("V"),err=validar(C,r,V),e=$("error");
+ if(err){
+  e.style.display="block";e.textContent=err;
+  ["oDp","oB","oU"].forEach(function(i){$(i).textContent="—"});
+  $("estado").className="";$("estado").textContent="Entrada rechazada: no se realizó el cálculo.";
+  hist.push({C:C,r:r,V:V,rechazada:true,msg:err});
+  nivel(null);dibujar();return;
+ }
+ e.style.display="none";
+ var Dp=Math.round(C*(1+r/100)*1e6)/1e6,B=V-Dp,U=Dp/V*100,cl=clasificar(U);
+ $("oDp").textContent=fmt(Dp);$("oB").textContent=fmt(B);$("oU").textContent=fmt(U);
+ $("estado").className=cl.k;$("estado").textContent=cl.t+" — "+cl.m;
+ var desv=null;
+ PRUEBAS.forEach(function(p){if(p.Dp!==null&&p.C===C&&p.r===r&&p.V===V)desv=Dp-p.Dp});
+ hist.push({C:C,r:r,V:V,Dp:Dp,B:B,U:U,cl:cl,desv:desv});
+ nivel(U,cl.k);dibujar();
+}
+function nivel(U,k){
+ var n=$("nivel");
+ if(U===null){n.style.height="0";n.className="nivel";return}
+ n.style.height=(Math.min(U,120)/120*100)+"%";n.className="nivel "+(k==="ok"?"":k);
+ $("tanque").setAttribute("aria-label","Utilización del tanque: "+fmt(U)+" %");
+}
+function celda(t,c){var td=document.createElement("td");td.textContent=t;if(c)td.className=c;return td}
+function dibujar(){
+ var tb=$("hist");tb.innerHTML="";
+ hist.forEach(function(h,i){
+  var tr=document.createElement("tr");
+  tr.appendChild(celda(String(i+1)));
+  tr.appendChild(celda(isFinite(h.C)?fmt(h.C):"—"));tr.appendChild(celda(isFinite(h.r)?fmt(h.r):"—"));tr.appendChild(celda(isFinite(h.V)?fmt(h.V):"—"));
+  if(h.rechazada){for(var k=0;k<4;k++)tr.appendChild(celda("—"));tr.appendChild(celda("Entrada rechazada","e-bad"));tr.appendChild(celda("—"));}
+  else{
+   tr.appendChild(celda(fmt(h.Dp)));tr.appendChild(celda(fmt(h.B)));tr.appendChild(celda(fmt(h.U)));
+   tr.appendChild(celda(h.cl.t,"e-"+h.cl.k));tr.appendChild(celda(h.desv===null?"—":fmt(h.desv)));
+  }
+  tb.appendChild(tr);
+ });
+ $("vacio").style.display=hist.length?"none":"block";
+ grafico();
+}
+function grafico(){
+ var s=$("grafico"),NS="http://www.w3.org/2000/svg",v=hist.filter(function(h){return!h.rechazada});
+ s.innerHTML="";
+ function mk(t,a,tx){var x=document.createElementNS(NS,t);for(var k in a)x.setAttribute(k,a[k]);if(tx!==undefined)x.textContent=tx;s.appendChild(x);return x}
+ var L=64,R=580,T=16,Bm=230,max=100;
+ v.forEach(function(h){max=Math.max(max,h.Dp,h.V)});
+ max=Math.ceil(max*1.1/100)*100;
+ for(var i=0;i<=4;i++){
+  var y=Bm-(Bm-T)*i/4;
+  mk("line",{x1:L,x2:R,y1:y,y2:y,"class":"rejilla"});
+  mk("text",{x:L-8,y:y+4,"text-anchor":"end"},String(Math.round(max*i/4)));
+ }
+ mk("line",{x1:L,x2:L,y1:T,y2:Bm,"class":"ejes"});mk("line",{x1:L,x2:R,y1:Bm,y2:Bm,"class":"ejes"});
+ mk("text",{x:(L+R)/2,y:268,"text-anchor":"middle"},"Número de prueba");
+ mk("text",{x:14,y:(T+Bm)/2,"text-anchor":"middle",transform:"rotate(-90 14 "+((T+Bm)/2)+")"},"Volumen (m³)");
+ var n=hist.length||1;
+ hist.forEach(function(h,i){
+  if(h.rechazada)return;
+  var x=L+(R-L)*(i+.5)/n;
+  mk("text",{x:x,y:Bm+16,"text-anchor":"middle"},String(i+1));
+  mk("circle",{cx:x,cy:Bm-(Bm-T)*h.V/max,r:7,"class":"pc"});
+  mk("circle",{cx:x,cy:Bm-(Bm-T)*h.Dp/max,r:5,"class":"pd"});
+ });
+ mk("circle",{cx:380,cy:272,r:5,"class":"pd"});mk("text",{x:390,y:276},"Demanda proyectada");
+ mk("circle",{cx:510,cy:272,r:6,"class":"pc"});mk("text",{x:520,y:276},"Capacidad");
+}
+$("calcular").addEventListener("click",calcular);
+["C","r","V"].forEach(function(i){$(i).addEventListener("keydown",function(e){if(e.key==="Enter")calcular()})});
+$("limpiar").addEventListener("click",function(){hist=[];dibujar();nivel(null)});
+PRUEBAS.forEach(function(p,i){
+ var b=document.createElement("button");b.className="sec";b.type="button";b.textContent=(i+1)+". "+p.n;
+ b.addEventListener("click",function(){$("C").value=p.C;$("r").value=p.r;$("V").value=p.V});
+ $("chips").appendChild(b);
+});
+dibujar();
+})();
+</script>
+</body>
+</html>
